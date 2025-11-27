@@ -1,0 +1,9 @@
+*.pyc
+*__pycache__
+
+*test/
+music/
+
+*.bak
+*.log
+.env
