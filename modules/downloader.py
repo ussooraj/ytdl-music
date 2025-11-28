@@ -7,7 +7,7 @@ class MyLogger:
     def warning(self, msg): pass
     def error(self, msg): print(f"\n[Error] {msg}")
 
-def get_ydl_opts(codec_data, save_path, progress_hook):
+def ydl_opts(codec_data, save_path, progress_hook):
     codec = codec_data['codec']
     quality = codec_data['quality']
 
@@ -15,8 +15,8 @@ def get_ydl_opts(codec_data, save_path, progress_hook):
         'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
         'format': 'bestaudio/best',
 
-        'sponsorblock_remove': ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction'],
-        'concurrent_fragment_downloads': 4,
+        'sponsorblock_remove': ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic'],
+        # 'concurrent_fragment_downloads': 4,
 
         'cookiesfrombrowser': ('firefox',), # change to prefered browser (make sure youtube is logged in)
         
@@ -48,23 +48,22 @@ def get_ydl_opts(codec_data, save_path, progress_hook):
     
     return opts
 
-def cleanup_artifacts(save_path):
-    """Removes the stubborn 'NA - [Playlist].jpg' files."""
-    pattern = os.path.join(save_path, "NA - *.*")
-    for filepath in glob.glob(pattern):
-        try:
-            if filepath.lower().endswith(('.jpg', '.webp', '.png')):
+def rm_images(save_path):
+    """Removes all .jpg, .png, and .webp files from the directory."""
+    for ext in ('*.jpg', '*.png', '*.webp'):
+        for filepath in glob.glob(os.path.join(save_path, ext)):
+            try:
                 os.remove(filepath)
-        except OSError:
-            pass
+            except OSError:
+                pass
 
 def run_download(urls, codec_data, save_path, progress_hook):
-    options = get_ydl_opts(codec_data, save_path, progress_hook)
+    options = ydl_opts(codec_data, save_path, progress_hook)
     
     try:
         with yt_dlp.YoutubeDL(options) as ydl:
             ydl.download(urls)
-        cleanup_artifacts(save_path)
+        rm_images(save_path)
             
     except Exception as e:
         print(f"Critical Error: {e}")
