@@ -3,7 +3,7 @@
 A robust, terminal-based utility designed for the automated extraction of high-fidelity audio from YouTube. Built on top of `yt-dlp` and wrapped in a modern Python `rich` TUI.
 
 ## Core Features
-<img src="resources/preview.png" alt="CLI Downloader Preview" align="right" width="450">
+<img src="resources/preview.png" alt="CLI Downloader Preview" align="right" width="400">
 
 * **Audio Extraction:** Prioritizes Opus (WebM) direct stream copying. Supports Opus, MP3 (320kbps), FLAC, and M4A.
 * **SponsorBlock Integration:** Automatically detects and cuts non-music segments (intros, skits, self-promotion) during processing.
@@ -74,3 +74,8 @@ Configuration options can be modified in [downloader.py](modules/downloader.py) 
 | `outtmpl` | Filename template using metadata tags. | `'%(artist)s - %(title)s.%(ext)s'`, `'%(album)s/%(track_number)s - %(title)s.%(ext)s'` |
 | `writethumbnail` | Download cover art (embedded or separate). | `True` (save cover art), `False` |
 | `cookiesfrombrowser` | Use browser cookies for age-gated/premium music. | `'chrome'`, `'firefox'` (should be logged in) |
+
+
+## License
+
+This project is licensed under MIT, the terms specified in the [LICENCE](LICENCE) file.
