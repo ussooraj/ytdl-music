@@ -82,12 +82,11 @@ def get_codec_preference():
 
 def get_save_directory():
     """
-    Asks user for download directory. Defaults to current folder.
+    Asks user for download directory. Defaults to Music folder.
     """
     console.print("\n[bold cyan]Download Directory:[/bold cyan]")
-    default_dir = os.getcwd() + "/downloaded_files"
-    
-    path = Prompt.ask("Enter path (Leave empty for current folder)", default=default_dir)    
+    default_dir = os.path.join(os.path.expanduser("~"), "Music")    
+    path = Prompt.ask("Enter path (Leave empty for Music folder)", default=default_dir)    
     
     full_path = os.path.expanduser(path)    # Expand '~' if entered
 
