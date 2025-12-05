@@ -11,17 +11,19 @@ def header():
 def get_input_mode():
     console.print("\n[bold cyan]Select Input Mode:[/bold cyan]")
     console.print("1. Single YouTube URL")
-    console.print("2. Playlist URL")
+    console.print("2. Download Playlist")
     console.print("3. Text File (Batch Mode)")
     console.print("4. Search (Direct Download)")
+    console.print("5. Sync All Playlists")
     
-    choice = IntPrompt.ask("Enter your choice", choices=["1", "2", "3", "4"])
+    choice = IntPrompt.ask("Enter your choice", choices=["1", "2", "3", "4", "5"])
     
     mapping = {
         1: "url",
         2: "playlist",
         3: "file",
-        4: "search"
+        4: "search",
+        5: "sync"
     }
     return mapping[choice]
 
@@ -85,22 +87,25 @@ def get_save_directory():
     Asks user for download directory. Defaults to Music folder.
     """
     console.print("\n[bold cyan]Download Directory:[/bold cyan]")
-    default_dir = os.path.join(os.path.expanduser("~"), "Music")    
-    path = Prompt.ask("Enter path (Leave empty for Music folder)", default=default_dir)    
+    default_dir = os.path.join(os.path.expanduser("~"), "Music")
     
-    full_path = os.path.expanduser(path)    # Expand '~' if entered
+    while True:
+        path = Prompt.ask("Enter path (Leave empty for Music folder)", default=default_dir)    
+        full_path = os.path.abspath(os.path.expanduser(path))
 
-    # Create directory if it doesn't exist
-    if not os.path.exists(full_path):
+        console.print(f"[dim]Selected path: {full_path}[/dim]")
+
+        if os.path.exists(full_path):
+            return full_path
+        
         create = Confirm.ask(f"[yellow]Directory '{full_path}' does not exist. Create it?[/yellow]")
         if create:
             try:
                 os.makedirs(full_path)
                 console.print(f"[green]Created directory: {full_path}[/green]")
+                return full_path
             except OSError as e:
                 console.print(f"[red]Error creating directory: {e}[/red]")
-                return default_dir
+                console.print("[yellow]Please enter a valid path.[/yellow]")
         else:
-            return default_dir
-
-    return full_path
+            console.print("[yellow]Please enter a different path.[/yellow]")

@@ -1,6 +1,7 @@
 import yt_dlp
 import os
 import glob
+from .utils import rm_images
 
 class MyLogger:
     def debug(self, msg): pass
@@ -40,7 +41,7 @@ def ydl_opts(codec_data, save_path, progress_hook):
         ],
         
         'logger': MyLogger(),
-        'progress_hooks': [progress_hook],
+        'progress_hooks': progress_hook if isinstance(progress_hook, list) else [progress_hook],
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
@@ -48,14 +49,27 @@ def ydl_opts(codec_data, save_path, progress_hook):
     
     return opts
 
-def rm_images(save_path):
-    """Removes all .jpg, .png, and .webp files from the directory."""
-    for ext in ('*.jpg', '*.png', '*.webp'):
-        for filepath in glob.glob(os.path.join(save_path, ext)):
-            try:
-                os.remove(filepath)
-            except OSError:
-                pass
+def fetch_ids(playlist_url):
+    """
+    Fetches video IDs and titles from the playlist URL.
+    Returns a dict: {video_id: title}
+    """
+    opts = {
+        'extract_flat': True,
+        'quiet': True,
+        'no_warnings': True,
+    }
+    items = {}
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            result = ydl.extract_info(playlist_url, download=False)
+            if 'entries' in result:
+                for entry in result['entries']:
+                    if entry:
+                        items[entry['id']] = entry.get('title', 'Unknown Title')
+    except Exception as e:
+        print(f"[Error] Error fetching playlist info: {e}")
+    return items
 
 def run_download(urls, codec_data, save_path, progress_hook):
     options = ydl_opts(codec_data, save_path, progress_hook)
