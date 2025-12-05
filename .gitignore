@@ -8,3 +8,4 @@ music/
 *.bak
 *.log
 .env
+playlists.json
