@@ -10,17 +10,86 @@ from modules.ui import (
 )
 from modules.downloader import run_download
 
+def progress_bar():
+    return Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeRemainingColumn(),
+        console=console
+    )
+
 def main():
-    # --- UI PHASE ---
-    os.system('cls' if os.name == 'nt' else 'clear') # Clean start
+    console.clear()
     header()
 
     mode = get_input_mode()
+
+    if mode == "sync":
+        from modules.sync import load_config, sync_playlist
+        
+        config = load_config()
+        playlists = config.get('playlists', [])
+        
+        if not playlists:
+            console.print("[yellow]No synced playlists found. Use 'Download / Sync Playlist' to add one.[/yellow]")
+            return
+
+        console.print(f"\n[bold green]Starting Sync for {len(playlists)} playlists...[/bold green]")
+        
+        with progress_bar() as progress:
+            download_task = progress.add_task("[cyan]Initializing...", total=100)
+
+            def progress_hook(d):
+                if d['status'] == 'downloading':
+                    try:
+                        p = d.get('_percent_str', '0%').replace('%','')
+                        progress.update(download_task, completed=float(p), description=f"[cyan]Downloading: {d.get('filename', 'file')}")
+                    except:
+                        pass
+                elif d['status'] == 'finished':
+                    progress.update(download_task, description="[green]Processing Audio/Metadata...[/green]")
+
+            for pl in playlists:
+                sync_playlist(pl, progress_hook)
+
+        console.print("\n[bold green]Sync Operations Complete![/bold green]")
+        return
+
+    elif mode == "playlist":
+        from modules.sync import update_config, sync_playlist
+        
+        url = get_user_input("playlist")
+        save_path = get_save_directory()
+        audio_settings = get_codec_preference()
+        
+        new_entry = update_config(url, save_path, audio_settings)
+
+        console.print(f"\n[bold green]Starting Download/Sync...[/bold green]")
+        
+        with progress_bar() as progress:
+            download_task = progress.add_task("[cyan]Initializing...", total=100)
+
+            def progress_hook(d):
+                if d['status'] == 'downloading':
+                    try:
+                        p = d.get('_percent_str', '0%').replace('%','')
+                        progress.update(download_task, completed=float(p), description=f"[cyan]Downloading: {d.get('filename', 'file')}")
+                    except:
+                        pass
+                elif d['status'] == 'finished':
+                    progress.update(download_task, description="[green]Processing Audio/Metadata...[/green]")
+
+            sync_playlist(new_entry, progress_hook)
+            
+        console.print("\n[bold green]All Operations Complete![/bold green]")
+        return
+
     raw_input = get_user_input(mode)
     audio_settings = get_codec_preference()
     save_path = get_save_directory()
 
-    # --- PREPARE DATA ---
     urls = []
     if mode == "file":
         if os.path.exists(raw_input):
@@ -29,19 +98,9 @@ def main():
     else:
         urls = [raw_input]
 
-    # --- EXECUTION PHASE ---
     console.print(f"\n[bold green]Starting Download...[/bold green]")
     
-    # Create the Progress Bar Context
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeRemainingColumn(),
-        console=console
-    ) as progress:
-        
+    with progress_bar() as progress:
         download_task = progress.add_task("[cyan]Initializing...", total=100)
 
         def progress_hook(d):
