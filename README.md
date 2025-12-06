@@ -6,6 +6,7 @@ A robust, terminal-based utility designed for the automated extraction of high-f
 <img src="resources/preview.png" alt="CLI Downloader Preview" align="right" width="400">
 
 * **Audio Extraction:** Prioritizes Opus (WebM) direct stream copying. Supports Opus, MP3 (320kbps), FLAC, and M4A.
+* **Smart Playlist Sync:** Automatically mirrors YouTube playlists to your local directories. Adds new tracks and removes deleted ones to keep your library 1:1 with the source.
 * **SponsorBlock Integration:** Automatically detects and cuts non-music segments (intros, skits, self-promotion) during processing.
 * **Metadata Management:** Enforces `Title.ext` naming, embeds high-res album art and adds ID3 tags.
 * **Network Optimization:** Uses concurrent fragment downloading (N=4) to mitigate connection throttling.
@@ -50,9 +51,10 @@ The downloader accepts various input formats to suit different use cases.
 | Input Mode | Description | Example Input |
 | :--- | :--- | :--- |
 | **Single URL** | Download a specific individual track or video. | `https://www.youtube.com/watch?v=...` |
-| **Playlist URL** | Download an entire album, EP, or curated playlist. | `https://www.youtube.com/playlist?list=...` |
-| **Batch File** | Process a text file containing a list of URLs (one per line). | `batch_list.txt` (containing multiple URLs) |
+| **Download Playlist** | Download an entire playlist and set it up for future syncing. Mirrors the playlist state (adds/removes). | `https://www.youtube.com/playlist?list=...` |
+| **Text File** | Process a text file containing a list of URLs (one per line). | `batch_list.txt` (containing multiple URLs) |
 | **Search** | Download the top result for a specific search query. | `Artist Name - Song Title` |
+| **Sync All Playlists** | Update all previously downloaded playlists defined in `playlists.json`. | (No input required) |
 
 </br>
 
@@ -66,7 +68,8 @@ The downloader accepts various input formats to suit different use cases.
 
 ## Configuration
 
-Configuration options can be modified in [downloader.py](modules/downloader.py) within the `ydl_opts` dictionary.
+### Downloader Options
+Configuration options can be modified in [modules/downloader.py](modules/downloader.py) within the `ydl_opts` dictionary.
 
 | Option | Description | Music-Focused Examples |
 | :--- | :--- | :--- |
@@ -75,6 +78,8 @@ Configuration options can be modified in [downloader.py](modules/downloader.py) 
 | `writethumbnail` | Download cover art (embedded or separate). | `True` (save cover art), `False` |
 | `cookiesfrombrowser` | Use browser cookies for age-gated/premium music. | `'chrome'`, `'firefox'` (should be logged in) |
 
+### Sync Configuration
+Synced playlists are stored in `playlists.json`. This file is automatically managed when you use the "Download Playlist" mode, but can be manually edited if needed.
 
 ## License
 
